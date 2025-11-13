@@ -1,6 +1,6 @@
 # Example Crew
 
-Welcome to the Example Crew project, powered by [crewAI](https://crewai.com). This template is designed to help you set up a multi-agent AI system with ease, leveraging the powerful and flexible framework provided by crewAI. Our goal is to enable your agents to collaborate effectively on complex tasks, maximizing their collective intelligence and capabilities.
+Create a fully functional CrewAI agentic workflow in code. Your crew should use at least two tools, and to make this easier, integrate them using MCP servers. The simplest way to get started is with Docker Desktop and the MCP Toolkit.
 
 ## Installation
 
