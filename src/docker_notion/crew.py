@@ -23,8 +23,8 @@ class DockerNotion():
         # Notion MCP Server from DockerDesktop
         {
             "url": "http://localhost:3000/sse/notion",
-            "transport": "streamable-http",
-            "headers": {"Authorization": os.getenv("NOTION_MCP_KEY")},
+            "transport": "sse",
+            "headers": {"Authorization": "Bearer 7qxrzfkr723dek1f6f8gpppunoyybqt7pbd9qiq8cjp2b29ep8"},
         },
     ]
 
