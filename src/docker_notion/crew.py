@@ -19,7 +19,13 @@ class DockerNotion():
             "url": os.getenv("GOOGLE_SEARCH_URL"),
             "transport": "streamable-http",
             "headers": {"Authorization": os.getenv("GOOGLE_SEARCH_KEY")},
-        }
+        },
+        # Notion MCP Server from DockerDesktop
+        {
+            "url": "http://localhost:3000/sse/notion",
+            "transport": "streamable-http",
+            "headers": {"Authorization": os.getenv("NOTION_MCP_KEY")},
+        },
     ]
 
     # Learn more about YAML configuration files here:
@@ -40,7 +46,8 @@ class DockerNotion():
     def reporting_analyst(self) -> Agent:
         return Agent(
             config=self.agents_config['reporting_analyst'], # type: ignore[index]
-            verbose=True
+            verbose=True,
+            tools=self.get_mcp_tools()  # <-- añade la herramienta de Notion para crear páginas
         )
 
     # To learn more about structured task outputs,
