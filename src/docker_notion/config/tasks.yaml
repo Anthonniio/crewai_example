@@ -15,7 +15,7 @@ research_task:
     - If you can't find {number_of_shops} coffee shops, find as many as you can (minimum 3)
     - Make sure each coffee shop name is unique
     - For Google Maps URLs, use the format: https://www.google.com/maps/search/?api=1&query=COFFEE_SHOP_NAME+{location}
-    - DO NOT MAKE MOR THAN 3 RESEARCHERS USING YOUR TOOLS.
+    - DO NOT MAKE MOR THAN 3 CALLS TO WEB SEARCH.
     
     Current year: {current_year}
   expected_output: >
