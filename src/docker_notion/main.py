@@ -17,17 +17,11 @@ def run():
     """
     Run the crew.
     """
-    try:
-        topic = input("Introduce el topic para 'crewai run' (enter para usar valor por defecto): ").strip()
-    except EOFError:
-        topic = ""
-
-    if not topic:
-        topic = "Coffe shops in Madrid"
-
     inputs = {
-        'topic': topic,
-        'current_year': str(datetime.now().year)
+    'location': 'Madrid',
+    'current_year': datetime.now().year,
+    'number_of_shops': 3,
+    'database_id': '2af7a08b529c806f87c6cf4b4045c3f9'  # Reemplaza con tu database ID
     }
 
     try:

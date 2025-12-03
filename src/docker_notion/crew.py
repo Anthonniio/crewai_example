@@ -1,11 +1,19 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
-from typing import List
+from crewai.mcp import MCPServerHTTP
+from crewai.mcp.filters import create_static_tool_filter
+from docker_notion.tools.custom_tool import NOTION_TOOLS
+from typing import List, Tuple
 import os
-# If you want to run a snippet of code before or after the crew starts,
-# you can use the @before_kickoff and @after_kickoff decorators
-# https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
+from dotenv import load_dotenv
+# Load environment variables
+load_dotenv()
+
+GOOGLE_TOOL_NAMES: Tuple[str, ...] = (
+    "search_web",
+    "search_images",
+)
 
 @CrewBase
 class DockerNotion():
@@ -13,69 +21,68 @@ class DockerNotion():
 
     agents: List[BaseAgent]
     tasks: List[Task]
-    mcp_server_params = [
-        # Google Search MCP Server (Streamable HTTP)
-        {
-            "url": os.getenv("GOOGLE_SEARCH_URL"),
-            "transport": "streamable-http",
-            "headers": {"Authorization": os.getenv("GOOGLE_SEARCH_KEY")},
-        },
-        # Notion MCP Server from DockerDesktop
-        {
-            "url": "http://localhost:3000/sse/notion",
-            "transport": "sse",
-            "headers": {"Authorization": "Bearer 7qxrzfkr723dek1f6f8gpppunoyybqt7pbd9qiq8cjp2b29ep8"},
-        },
-    ]
 
-    # Learn more about YAML configuration files here:
-    # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
-    # Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
-    
-    # If you would like to add tools to your agents, you can learn more about it here:
-    # https://docs.crewai.com/concepts/agents#agent-tools
+    def __init__(self):
+        """Initialize the crew with MCP server configurations"""
+        
+        # Configure Google Search MCP (via HTTP)
+        self.google_mcp = MCPServerHTTP(
+            url=os.getenv("GOOGLE_SEARCH_URL"),
+            headers={"Authorization": os.getenv("GOOGLE_SEARCH_KEY")},
+            streamable=True,
+            tool_filter=create_static_tool_filter(
+                allowed_tool_names=list(GOOGLE_TOOL_NAMES)
+            ),
+            cache_tools_list=True,
+        )
+
     @agent
     def researcher(self) -> Agent:
         return Agent(
-            config=self.agents_config['researcher'], # type: ignore[index]
+            config=self.agents_config['researcher'],  # type: ignore[index]
+            mcps=[self.google_mcp],
             verbose=True,
-            tools=self.get_mcp_tools("search_web", "search_images")  # Google Search tools
+            max_interations=3
         )
 
     @agent
     def reporting_analyst(self) -> Agent:
         return Agent(
-            config=self.agents_config['reporting_analyst'], # type: ignore[index]
+            config=self.agents_config['reporting_analyst'],  # type: ignore[index]
+            tools=NOTION_TOOLS,
             verbose=True,
-            tools=self.get_mcp_tools()  # <-- añade la herramienta de Notion para crear páginas
         )
 
-    # To learn more about structured task outputs,
-    # task dependencies, and task callbacks, check out the documentation:
-    # https://docs.crewai.com/concepts/tasks#overview-of-a-task
     @task
     def research_task(self) -> Task:
         return Task(
             config=self.tasks_config['research_task'], # type: ignore[index]
         )
+    
+    @task
+    def deduplicate_research_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['deduplicate_research_task'], # type: ignore[index]
+        )
 
     @task
-    def reporting_task(self) -> Task:
+    def create_database_entries_task(self) -> Task:
         return Task(
-            config=self.tasks_config['reporting_task'], # type: ignore[index]
-            output_file='report.md'
+            config=self.tasks_config['create_database_entries_task'], # type: ignore[index]
+        )
+    
+    @task
+    def add_simple_descriptions_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['add_simple_descriptions_task'], # type: ignore[index]
         )
 
     @crew
     def crew(self) -> Crew:
         """Creates the DockerNotion crew"""
-        # To learn how to add knowledge sources to your crew, check out the documentation:
-        # https://docs.crewai.com/concepts/knowledge#what-is-knowledge
-
         return Crew(
-            agents=self.agents, # Automatically created by the @agent decorator
-            tasks=self.tasks, # Automatically created by the @task decorator
+            agents=self.agents,
+            tasks=self.tasks,
             process=Process.sequential,
             verbose=True,
-            # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
         )

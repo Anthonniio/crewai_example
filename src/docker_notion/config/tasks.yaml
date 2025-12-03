@@ -1,18 +1,84 @@
 research_task:
   description: >
-    Conduct a thorough research about {topic}
-    Make sure you find any interesting and relevant information given
-    the current year is {current_year}.
+    Conduct a thorough research about coffee shops in {location}.
+    
+    Use web search to find information about the best specialty coffee shops.
+    For each coffee shop you find, gather:
+    - Name of the coffee shop (must be a real, existing establishment)
+    - Rating based on reviews and reputation (estimate a number between 1-5)
+    - Google Maps location URL (search for "coffee shop name + {location} google maps")
+    - Detailed information (atmosphere, specialties, what makes it unique)
+    
+    IMPORTANT:
+    - Always verify that search results contain actual information before processing
+    - If a search returns no results, try a different query
+    - If you can't find {number_of_shops} coffee shops, find as many as you can (minimum 3)
+    - Make sure each coffee shop name is unique
+    - For Google Maps URLs, use the format: https://www.google.com/maps/search/?api=1&query=COFFEE_SHOP_NAME+{location}
+    - DO NOT MAKE MOR THAN 3 RESEARCHERS USING YOUR TOOLS.
+    
+    Current year: {current_year}
   expected_output: >
-    A list with some bullet points of the most relevant information about {topic}.
-    Normally the number of top points is stated in the input. If not, 5 is okay.
+    A structured list of coffee shops, each containing:
+    - name (string)
+    - rating (number between 1-5)
+    - google_maps_url (valid URL)
+    - description (detailed text about the coffee shop)
+    
+    If fewer than {number_of_shops} were found, explain why and provide what you found.
   agent: researcher
+  output_file: research_output.md
+  max_iterations: 3
 
-reporting_task:
+deduplicate_research_task:
   description: >
-    Review the context you got and expand each topic into a full section for a report.
-    Make sure the report is detailed and contains any and all relevant information.
+    Review the research results and remove any duplicate coffee shops.
+    Check the list and ensure each coffee shop appears only once based on name.
+    If there are duplicates, keep only the one with more complete information.
+    You can use the NotionQueryDatabase tool to check existing entries in the Notion database.
+    You can archive (erase) duplicate entries using NotionArchivePage tool.
   expected_output: >
-    A fully fledged report with the main topics, each with a full section of information.
-    Formatted as markdown without '```'
+    A deduplicated list of unique coffee shops with complete information.
+  agent: researcher
+  context:
+    - research_task
+  output_file: deduplicated_research.md
+
+create_database_entries_task:
+  description: >
+    Create ONE database entry for EACH unique coffee shop from the research.
+    Use NotionPostPage tool to create entries in the Notion database.
+    
+    CRITICAL RULES:
+    - Create exactly ONE entry per coffee shop
+    - After creating each entry, note down: "Created [Coffee Shop Name] with page_id: [ID]"
+    
+    Process each coffee shop one at a time.
+  expected_output: >
+    A simple list showing:
+    - Coffee Shop 1: [Name] | Page ID: [actual UUID] | [Created/not created]
+    - Coffee Shop 2: [Name] | Page ID: [actual UUID] | [Created/not created]
+    - Coffee Shop 3: [Name] | Page ID: [actual UUID] | [Created/not created]
+    
+    Total: X entries created
   agent: reporting_analyst
+  context:
+    - deduplicate_research_task
+  output_file: created_entries.md
+
+add_simple_descriptions_task:
+  description: >
+    Look at the previous task output and find each Page ID.
+    For EACH CREATED coffee shop entry:
+    - Take its Page ID (the UUID format)
+    - Take its description text from the research results
+    
+    THEN:
+    Use NotionPatchBlockChildren tool to add the description as a paragraph block to the corresponding Notion page.
+  expected_output: >
+    "Added description to [Coffee Shop Name]"
+  agent: reporting_analyst
+  context:
+    - research_task
+    - create_database_entries_task
+  output_file: descriptions_added.md
