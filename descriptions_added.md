@@ -1,3 +1,3 @@
-Added description to Hola Coffee (Lagasca)
-Added description to Naji Specialty Coffee
-Added description to UMAMI SPECIALTY COFFEE
+Added description to Hola Coffee
+Added description to Misión Café
+Added description to Osom Coffee
