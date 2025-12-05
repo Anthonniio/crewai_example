@@ -36,7 +36,7 @@ deduplicate_research_task:
     You can use the NotionQueryDatabase tool to check existing entries in the Notion database.
   expected_output: >
     A deduplicated list of unique coffee shops with complete information.
-  agent: researcher
+  agent: reporting_analyst
   context:
     - research_task
   output_file: deduplicated_research.md
