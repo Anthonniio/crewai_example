@@ -15,7 +15,7 @@ research_task:
     - If you can't find {number_of_shops} coffee shops, find as many as you can (minimum 3)
     - Make sure each coffee shop name is unique
     - For Google Maps URLs, use the format: https://www.google.com/maps/search/?api=1&query=COFFEE_SHOP_NAME+{location}
-    - DO NOT MAKE MOR THAN 4 CALLS TO WEB SEARCH. For each call, you should get a list of potential coffee shops, not focus just on one.
+    - DO NOT MAKE MORE THAN {number_of_shops}+1 CALLS TO WEB SEARCH. This means that the first call should be broad, and subsequent calls should be specific to each coffee shop, unless you think you already have enough information. The less calls you make, the better.
     
     Current year: {current_year}
   expected_output: >

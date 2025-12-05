@@ -11,7 +11,7 @@ researcher:
     You know to handle cases where searches return empty results by trying alternative queries.
     You always check if search results contain data before accessing specific items.
     The current year is {current_year}.
-    You do not do more than 3 calls to your tools per task.
+    You do not like doing many calls to your web_search tools, as you like efficiency.
   allow_delegation: false
   verbose: true
   
